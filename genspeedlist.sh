@@ -8,6 +8,8 @@ if [ x$PROXYRULE = x ]; then
     PROXYRULE=ss_rules_dst_forward_gfwlist
 fi
 
+INPUT_FILE=speedlist.txt
+
 OUT_FILE=
 
 usage() {
@@ -21,6 +23,7 @@ usage:
   $CMD [option|-o,-d,-r]
 
   option:
+    -i : input srream, default speedlist.txt
     -o : output stream, default  stdout
     -d : dns forward, default  127.0.0.1#5300
     -r : proxy redirect rule , default ss_rules_dst_forward_gfwlist
@@ -38,6 +41,19 @@ parse_parameter() {
         fi
 
         ## output file
+        if [ $1 = '-i' ]; then
+            shift
+            if [ x$1 = x ]; then
+                usage "option [-i] required  a  parameter" 2 >&2
+
+            else
+                INPUT_FILE=$1
+                shift
+                continue
+            fi
+        fi
+
+        ## output file
         if [ $1 = '-o' ]; then
             shift
             if [ x$1 = x ]; then
@@ -51,7 +67,6 @@ parse_parameter() {
         fi
 
         ## dns
-
         if [ $1 = '-d' ]; then
             shift
             if [ x$1 = x ]; then
@@ -80,7 +95,7 @@ parse_parameter() {
 }
 
 genitem() {
-    for line in $(cat speedlist.txt); do
+    for line in $(cat $INPUT_FILE); do
 
         echo server=/$line/$PROXYDNS
         echo ipset=/$line/$PROXYRULE
